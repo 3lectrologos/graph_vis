@@ -1,0 +1,98 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usetikzlibrary{decorations}
+\usepackage{pgfplotstable}
+\usepackage{xcolor}
+
+
+% https://tex.stackexchange.com/questions/14283/stroke-with-variable-thickness
+\makeatletter
+
+\pgfkeys{/pgf/decoration/.cd,
+	start color/.store in =\startcolor,
+	end color/.store in   =\endcolor,
+	start width/.store in   =\startwidth,
+	end width/.store in   =\endwidth
+}
+
+\pgfdeclaredecoration{width and color change}{initial}{
+	\state{initial}[width=0pt, next state=line, persistent precomputation={%
+		\pgfmathdivide{50}{\pgfdecoratedpathlength}%
+		\let\increment=\pgfmathresult%
+		\def\x{0}%
+	}]{}
+	\state{line}[width=0.5pt,
+	  persistent postcomputation={%
+		\pgfmathadd@{\x}{\increment}%
+		\let\x=\pgfmathresult%
+	}]{%
+		\pgfsetlinewidth{\endwidth*(\x/100)+\startwidth*(100-\x)/100}%
+		%\pgfsetlinewidth{\pgflinewidth}%
+		\pgfsetarrows{-}%
+		\pgfpathmoveto{\pgfpointorigin}%
+		\pgfpathlineto{\pgfqpoint{0.75pt}{0pt}}%
+		\pgfsetstrokecolor{\endcolor!\x!\startcolor}%
+		\pgfusepath{stroke}%
+	}
+	\state{final}{%
+		\pgfsetlinewidth{\endwidth}%
+		\pgfpathmoveto{\pgfpointorigin}%
+        %\pgfpathlineto{\pgfpointdecoratedpathlast\advance\pgf@... by2.0\pgflinewidth}%
+		\color{\endcolor!\x!\startcolor}%
+		\pgfusepath{stroke}% 
+	}
+}
+
+\makeatother
+
+
+\pgfplotstableread{positions.txt}\ptable
+\pgfplotstableread{weights.txt}\wtable
+\pgfplotstablegetrowsof{\ptable}
+\pgfmathsetmacro{\nrows}{\pgfplotsretval-1}
+\pgfplotstablegetcolsof{\ptable}
+\pgfmathsetmacro{\ncols}{\pgfplotsretval-1}
+
+
+\begin{document}
+\begin{tikzpicture}[
+  scale=1.5,
+  nodestyle/.style={rectangle,draw=none,fill=darkgray,minimum size=12.5pt,inner sep=0},
+  linestyle/.style={line width=5pt},
+  axisstyle/.style={darkgray, line width=2pt}
+  ]
+
+  \foreach \row in {0,...,\nrows} {
+    \xdef\y{-5*\row}
+    \node[] (s\row) at (-0.5, \y) {};
+    \node[] (e\row) at (17.5, \y) {};
+    \draw[axisstyle] (s\row) -- (e\row);
+    \foreach \col in {0,...,\ncols}
+      \pgfplotstablegetelem{\row}{[index]\col}\of\ptable
+      \xdef\x{10*\pgfplotsretval}
+      \node [nodestyle] (\row/\col) at (\x, \y) {};
+  }
+
+  \pgfmathsetmacro\nrowsminusone{\nrows-1}
+  \foreach \row in {0,...,\nrowsminusone}
+    \foreach \col in {0,...,\ncols}
+      \pgfplotstablegetelem{\row}{[index]\col}\of\wtable
+      \let\wstart = \pgfplotsretval
+      \pgfmathsetmacro\nextrow{int(round(\row+1))}
+      \pgfplotstablegetelem{\nextrow}{[index]\col}\of\wtable
+      \let\wend = \pgfplotsretval
+      \colorlet{cstart}{orange!\wstart!blue}
+      \colorlet{cend}{orange!\wend!blue}
+      \pgfmathsetmacro\wdstart{1 + \wstart/9}
+      \pgfmathsetmacro\wdend{1 + \wend/9}
+      \draw [linestyle, decoration={width and color change, start color=cstart, end color=cend, start width=\wdstart, end width=\wdend}, decorate] (\row/\col.center) to [out=-90,in=90,looseness=0.8] (\nextrow/\col.center);
+
+  \foreach \row in {0,...,\nrows}
+    \foreach \col in {0,...,\ncols}
+      \pgfplotstablegetelem{\row}{[index]\col}\of\ptable
+      \xdef\x{10*\pgfplotsretval}
+      \xdef\y{-5*\row}
+      \node [nodestyle]  () at (\x, \y) {};
+
+\end{tikzpicture}
+\end{document}
