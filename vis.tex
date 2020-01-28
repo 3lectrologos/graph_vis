@@ -14,20 +14,32 @@
 \def\ystretch{5}
 \def\minnodesize{8}
 \def\nodemul{7}
-\def\minwidth{0.2}
-\def\widthmulti{6}
+\def\minwidth{1}
+\def\widthmulti{5}
 \colorlet{locol}{darkgray!30!white}
 \colorlet{hicol}{RoyalPurple}
 
-\definecolor{col0}{HTML}{fff7f3}
-\definecolor{col1}{HTML}{fde0dd}
-\definecolor{col2}{HTML}{fcc5c0}
-\definecolor{col3}{HTML}{fa9fb5}
-\definecolor{col4}{HTML}{f768a1}
-\definecolor{col5}{HTML}{dd3497}
-\definecolor{col6}{HTML}{ae017e}
-\definecolor{col7}{HTML}{7a0177}
-\definecolor{col8}{HTML}{49006a}
+% Sequential color map
+\definecolor{col0}{HTML}{ffffcc}
+\definecolor{col1}{HTML}{ffeda0}
+\definecolor{col2}{HTML}{fed976}
+\definecolor{col3}{HTML}{feb24c}
+\definecolor{col4}{HTML}{fd8d3c}
+\definecolor{col5}{HTML}{fc4e2a}
+\definecolor{col6}{HTML}{e31a1c}
+\definecolor{col7}{HTML}{bd0026}
+\definecolor{col8}{HTML}{800026}
+
+% Qualitative color map
+%\definecolor{col0}{HTML}{a6cee3}
+%\definecolor{col1}{HTML}{1f78b4}
+%\definecolor{col2}{HTML}{b2df8a}
+%\definecolor{col3}{HTML}{33a02c}
+%\definecolor{col4}{HTML}{fb9a99}
+%\definecolor{col5}{HTML}{e31a1c}
+%\definecolor{col6}{HTML}{fdbf6f}
+%\definecolor{col7}{HTML}{ff7f00}
+%\definecolor{col8}{HTML}{cab2d6}
 
 \newcommand\col[1]{col#1}
 
@@ -86,8 +98,8 @@
 \begin{document}
 \begin{tikzpicture}[
   scale=1,
-  nodestyle/.style={circle,draw=darkgray,line width=0.8pt,fill=darkgray,minimum size=0pt,inner sep=0, anchor=center},
-  axisstyle/.style={darkgray, line width=0.8pt}
+  nodestyle/.style={circle,draw=darkgray!80!white,line width=0.6pt,fill=darkgray,minimum size=0pt,inner sep=0, anchor=center},
+  axisstyle/.style={darkgray!80!white, line width=0.6pt}
   ]
 
   \foreach \row in {0,...,\nrows} {
@@ -134,7 +146,7 @@
 	\xdef\swidth{\minwidth + \widthmulti*\pgfplotsretval}
 	\pgfplotstablegetelem{\row}{[index]7}\of\etable
 	\xdef\twidth{\minwidth + \widthmulti*\pgfplotsretval}
-	%\draw [decoration={width and color change, start color=darkgray!80!white, end color=darkgray!80!white, start width=3*\swidth, end width=3*\twidth}, decorate] (\srow/\scol.center) to [out=-90,in=90,looseness=0.8] (\trow/\tcol.center);
+	\draw [decoration={width and color change, start color=darkgray!80!white, end color=darkgray!80!white, start width=1.5*\swidth, end width=1.5*\twidth}, decorate] (\srow/\scol.center) to [out=-90,in=90,looseness=0.8] (\trow/\tcol.center);
 	\draw [decoration={width and color change, start color=cstart, end color=cend, start width=\swidth, end width=\twidth}, decorate] (\srow/\scol.center) to [out=-90,in=90,looseness=0.8] (\trow/\tcol.center);
   }
   
@@ -153,7 +165,6 @@
   	\xdef\nodesize{\minnodesize+\nodemul*\pgfplotsretval}
   	\node [nodestyle,fill=nodecol,minimum size=\nodesize] (\noderow/\nodecol) at (\xstretch*\nodepos, -\ystretch*\noderow) {};
   }
-
 
 \end{tikzpicture}
 \end{document}
