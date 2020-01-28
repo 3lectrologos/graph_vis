@@ -6,15 +6,30 @@
 
 
 % Parameters
-\def\xstretch{15}
+\def\axisa{\LARGE$a$}
+\def\axisb{\LARGE$b$}
+\newcommand\timetext[1]{\LARGE$t=#1$}
+
+\def\xstretch{12}
 \def\ystretch{5}
-\def\minnodesize{15}
-\def\nodemul{10}
-\def\minwidth{0.5}
-\def\widthmulti{8}
+\def\minnodesize{8}
+\def\nodemul{7}
+\def\minwidth{0.2}
+\def\widthmulti{6}
 \colorlet{locol}{darkgray!30!white}
 \colorlet{hicol}{RoyalPurple}
 
+\definecolor{col0}{HTML}{fff7f3}
+\definecolor{col1}{HTML}{fde0dd}
+\definecolor{col2}{HTML}{fcc5c0}
+\definecolor{col3}{HTML}{fa9fb5}
+\definecolor{col4}{HTML}{f768a1}
+\definecolor{col5}{HTML}{dd3497}
+\definecolor{col6}{HTML}{ae017e}
+\definecolor{col7}{HTML}{7a0177}
+\definecolor{col8}{HTML}{49006a}
+
+\newcommand\col[1]{col#1}
 
 % https://tex.stackexchange.com/questions/14283/stroke-with-variable-thickness
 \makeatletter
@@ -22,7 +37,7 @@
 \pgfkeys{/pgf/decoration/.cd,
 	start color/.store in =\startcolor,
 	end color/.store in   =\endcolor,
-	start width/.store in   =\startwidth,
+	start width/.store in =\startwidth,
 	end width/.store in   =\endwidth
 }
 
@@ -63,13 +78,16 @@
 \pgfplotstableread{edges.txt}\etable
 \pgfplotstablegetrowsof{\etable}
 \pgfmathsetmacro{\erows}{\pgfplotsretval-1}
+\pgfplotstableread{times.txt}\ttable
+\pgfplotstablegetrowsof{\ttable}
+\pgfmathsetmacro{\trows}{\pgfplotsretval-1}
 
 
 \begin{document}
 \begin{tikzpicture}[
-  scale=1.5,
-  nodestyle/.style={circle,draw=none,line width=0pt,fill=darkgray,minimum size=0pt,inner sep=0},
-  axisstyle/.style={darkgray, line width=2pt}
+  scale=1,
+  nodestyle/.style={circle,draw=darkgray,line width=0.8pt,fill=darkgray,minimum size=0pt,inner sep=0, anchor=center},
+  axisstyle/.style={darkgray, line width=0.8pt}
   ]
 
   \foreach \row in {0,...,\nrows} {
@@ -82,44 +100,60 @@
     \node [nodestyle] (\noderow/\nodecol) at (\xstretch*\nodepos, -\ystretch*\noderow) {};
   }
 
-  \foreach \row in {0,...,\erows} {
-    \pgfplotstablegetelem{\row}{[index]0}\of\etable
-    \xdef\srow{\pgfplotsretval}
-    \pgfplotstablegetelem{\row}{[index]1}\of\etable
-    \xdef\scol{\pgfplotsretval}
-    \pgfplotstablegetelem{\row}{[index]2}\of\etable
-    \xdef\trow{\pgfplotsretval}
-    \pgfplotstablegetelem{\row}{[index]3}\of\etable
-    \xdef\tcol{\pgfplotsretval}
-    % Colors
-    \pgfplotstablegetelem{\row}{[index]4}\of\etable
-    \xdef\sclr{\pgfplotsretval}
-    \colorlet{cstart}{hicol!\sclr!locol}
-    \pgfplotstablegetelem{\row}{[index]5}\of\etable
-    \xdef\tclr{\pgfplotsretval}
-    \colorlet{cend}{hicol!\tclr!locol}
-    % Widths
-    \pgfplotstablegetelem{\row}{[index]6}\of\etable
-    \xdef\swidth{\minwidth + \widthmulti*\pgfplotsretval}
-    \pgfplotstablegetelem{\row}{[index]7}\of\etable
-    \xdef\twidth{\minwidth + \widthmulti*\pgfplotsretval}
-    \draw [decoration={width and color change, start color=cstart, end color=cend, start width=\swidth, end width=\twidth}, decorate] (\srow/\scol.center) to [out=-90,in=90,looseness=0.8] (\trow/\tcol.center);
+    \foreach \row in {0,...,\trows} {
+  	\node[minimum size=0,inner sep=0] (s\row) at (-0*\xstretch, -\ystretch*\row) {};
+  	\node[minimum size=0,inner sep=0] (e\row) at (1*\xstretch, -\ystretch*\row) {};
+  	\draw[axisstyle] (s\row) -- (e\row);
+  	\node[anchor=south] (a\row) at (-0*\xstretch, -0.8-\ystretch*\row) {\axisa};
+  	\node[anchor=south] (b\row) at (1*\xstretch, -0.8-\ystretch*\row) {\axisb};
+  	\pgfplotstablegetelem{\row}{[index]0}\of\ttable
+  	\xdef\time{\pgfplotsretval}
+  	\node[anchor=east] (foo\row) at (-0.08*\xstretch, -\ystretch*\row) {\timetext{\time}};
   }
 
-  \foreach \row in {0,...,\nrows} {
-	\pgfplotstablegetelem{\row}{[index]0}\of\ntable
-	\xdef\noderow{\pgfplotsretval}
-	\pgfplotstablegetelem{\row}{[index]1}\of\ntable
-	\xdef\nodecol{\pgfplotsretval}
-	\pgfplotstablegetelem{\row}{[index]2}\of\ntable
-	\xdef\nodepos{\pgfplotsretval}
-	\pgfplotstablegetelem{\row}{[index]3}\of\ntable
-	\xdef\nodecol{\pgfplotsretval}
-	\colorlet{col}{hicol!\nodecol!locol}
-	\pgfplotstablegetelem{\row}{[index]4}\of\ntable
-    \xdef\nodesize{\minnodesize+\nodemul*\pgfplotsretval}
-	\node [nodestyle,fill=col,minimum size=\nodesize] (\noderow/\nodecol) at (\xstretch*\nodepos, -\ystretch*\noderow) {};
+  \foreach \row in {0,...,\erows} {
+	\pgfplotstablegetelem{\row}{[index]0}\of\etable
+	\xdef\srow{\pgfplotsretval}
+	\pgfplotstablegetelem{\row}{[index]1}\of\etable
+	\xdef\scol{\pgfplotsretval}
+	\pgfplotstablegetelem{\row}{[index]2}\of\etable
+	\xdef\trow{\pgfplotsretval}
+	\pgfplotstablegetelem{\row}{[index]3}\of\etable
+	\xdef\tcol{\pgfplotsretval}
+	% Colors
+	\pgfplotstablegetelem{\row}{[index]4}\of\etable
+	\xdef\sclr{\pgfplotsretval}
+	\colorlet{cstart}{\col{\sclr}}
+	%\colorlet{cstart}{hicol!\sclr!locol}
+	\pgfplotstablegetelem{\row}{[index]5}\of\etable
+	\xdef\tclr{\pgfplotsretval}
+	\colorlet{cend}{\col{\tclr}}
+	%\colorlet{cend}{hicol!\tclr!locol}
+	% Widths
+	\pgfplotstablegetelem{\row}{[index]6}\of\etable
+	\xdef\swidth{\minwidth + \widthmulti*\pgfplotsretval}
+	\pgfplotstablegetelem{\row}{[index]7}\of\etable
+	\xdef\twidth{\minwidth + \widthmulti*\pgfplotsretval}
+	%\draw [decoration={width and color change, start color=darkgray!80!white, end color=darkgray!80!white, start width=3*\swidth, end width=3*\twidth}, decorate] (\srow/\scol.center) to [out=-90,in=90,looseness=0.8] (\trow/\tcol.center);
+	\draw [decoration={width and color change, start color=cstart, end color=cend, start width=\swidth, end width=\twidth}, decorate] (\srow/\scol.center) to [out=-90,in=90,looseness=0.8] (\trow/\tcol.center);
   }
+  
+  \foreach \row in {0,...,\nrows} {
+  	\pgfplotstablegetelem{\row}{[index]0}\of\ntable
+  	\xdef\noderow{\pgfplotsretval}
+  	\pgfplotstablegetelem{\row}{[index]1}\of\ntable
+  	\xdef\nodecol{\pgfplotsretval}
+  	\pgfplotstablegetelem{\row}{[index]2}\of\ntable
+  	\xdef\nodepos{\pgfplotsretval}
+  	\pgfplotstablegetelem{\row}{[index]3}\of\ntable
+  	\xdef\nodecolor{\pgfplotsretval}
+  	\colorlet{nodecol}{\col{\nodecolor}}
+  	%\colorlet{nodecol}{hicol!\nodecolor!locol}
+  	\pgfplotstablegetelem{\row}{[index]4}\of\ntable
+  	\xdef\nodesize{\minnodesize+\nodemul*\pgfplotsretval}
+  	\node [nodestyle,fill=nodecol,minimum size=\nodesize] (\noderow/\nodecol) at (\xstretch*\nodepos, -\ystretch*\noderow) {};
+  }
+
 
 \end{tikzpicture}
 \end{document}

@@ -1,0 +1,54 @@
+\documentclass{standalone}
+\PassOptionsToPackage{dvipsnames}{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{decorations}
+\usepackage{pgfplotstable}
+
+
+\def\xshift{1/18}
+
+\begin{document}
+
+\pgfplotsset{
+	% define the custom colormap
+	colormap={my colormap}{
+		HTML=(fff7f3),
+		HTML=(fde0dd),
+		HTML=(fcc5c0),
+		HTML=(fa9fb5),
+		HTML=(f768a1),
+		HTML=(dd3497),
+		HTML=(ae017e),
+		HTML=(7a0177),
+		HTML=(49006a),
+	},
+}
+
+\begin{tikzpicture}[]
+\begin{axis}[
+hide axis,
+scale only axis,
+height=0pt,
+width=0pt,
+colormap name=my colormap,
+colorbar sampled,
+colormap access=piecewise const,
+colorbar horizontal,
+point meta min=0,
+point meta max=1,
+colorbar style={
+	xlabel={Layer},
+	samples=10,
+	height=0.5cm,
+	width=10cm,
+	xtick={0+\xshift, 1/9+\xshift, 2/9+\xshift, 3/9+\xshift, 4/9+\xshift, 5/9+\xshift, 6/9+\xshift, 7/9+\xshift, 8/9+\xshift},
+	xticklabels={1, 2, 3, 4, 5, 6, 7, 8, 9},
+	xtick style={draw=none},
+    at={(0,1.2)},
+    anchor=north
+},
+]
+\addplot [draw=none] coordinates {(0,0)};
+\end{axis}
+\end{tikzpicture}
+\end{document}
