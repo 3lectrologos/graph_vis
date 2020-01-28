@@ -1,8 +1,19 @@
 \documentclass{standalone}
+\PassOptionsToPackage{dvipsnames}{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{decorations}
 \usepackage{pgfplotstable}
-\usepackage{xcolor}
+
+
+% Parameters
+\def\xstretch{15}
+\def\ystretch{5}
+\def\minnodesize{15}
+\def\nodemul{10}
+\def\minwidth{0.5}
+\def\widthmulti{8}
+\colorlet{locol}{darkgray!30!white}
+\colorlet{hicol}{RoyalPurple}
 
 
 % https://tex.stackexchange.com/questions/14283/stroke-with-variable-thickness
@@ -46,53 +57,69 @@
 \makeatother
 
 
-\pgfplotstableread{positions.txt}\ptable
-\pgfplotstableread{weights.txt}\wtable
-\pgfplotstablegetrowsof{\ptable}
+\pgfplotstableread{nodes.txt}\ntable
+\pgfplotstablegetrowsof{\ntable}
 \pgfmathsetmacro{\nrows}{\pgfplotsretval-1}
-\pgfplotstablegetcolsof{\ptable}
-\pgfmathsetmacro{\ncols}{\pgfplotsretval-1}
+\pgfplotstableread{edges.txt}\etable
+\pgfplotstablegetrowsof{\etable}
+\pgfmathsetmacro{\erows}{\pgfplotsretval-1}
 
 
 \begin{document}
 \begin{tikzpicture}[
   scale=1.5,
-  nodestyle/.style={rectangle,draw=none,fill=darkgray,minimum size=12.5pt,inner sep=0},
-  linestyle/.style={line width=5pt},
+  nodestyle/.style={circle,draw=none,line width=0pt,fill=darkgray,minimum size=0pt,inner sep=0},
   axisstyle/.style={darkgray, line width=2pt}
   ]
 
   \foreach \row in {0,...,\nrows} {
-    \xdef\y{-5*\row}
-    \node[] (s\row) at (-0.5, \y) {};
-    \node[] (e\row) at (17.5, \y) {};
-    \draw[axisstyle] (s\row) -- (e\row);
-    \foreach \col in {0,...,\ncols}
-      \pgfplotstablegetelem{\row}{[index]\col}\of\ptable
-      \xdef\x{10*\pgfplotsretval}
-      \node [nodestyle] (\row/\col) at (\x, \y) {};
+    \pgfplotstablegetelem{\row}{[index]0}\of\ntable
+    \xdef\noderow{\pgfplotsretval}
+    \pgfplotstablegetelem{\row}{[index]1}\of\ntable
+    \xdef\nodecol{\pgfplotsretval}
+    \pgfplotstablegetelem{\row}{[index]2}\of\ntable
+    \xdef\nodepos{\pgfplotsretval}
+    \node [nodestyle] (\noderow/\nodecol) at (\xstretch*\nodepos, -\ystretch*\noderow) {};
   }
 
-  \pgfmathsetmacro\nrowsminusone{\nrows-1}
-  \foreach \row in {0,...,\nrowsminusone}
-    \foreach \col in {0,...,\ncols}
-      \pgfplotstablegetelem{\row}{[index]\col}\of\wtable
-      \let\wstart = \pgfplotsretval
-      \pgfmathsetmacro\nextrow{int(round(\row+1))}
-      \pgfplotstablegetelem{\nextrow}{[index]\col}\of\wtable
-      \let\wend = \pgfplotsretval
-      \colorlet{cstart}{orange!\wstart!blue}
-      \colorlet{cend}{orange!\wend!blue}
-      \pgfmathsetmacro\wdstart{1 + \wstart/9}
-      \pgfmathsetmacro\wdend{1 + \wend/9}
-      \draw [linestyle, decoration={width and color change, start color=cstart, end color=cend, start width=\wdstart, end width=\wdend}, decorate] (\row/\col.center) to [out=-90,in=90,looseness=0.8] (\nextrow/\col.center);
+  \foreach \row in {0,...,\erows} {
+    \pgfplotstablegetelem{\row}{[index]0}\of\etable
+    \xdef\srow{\pgfplotsretval}
+    \pgfplotstablegetelem{\row}{[index]1}\of\etable
+    \xdef\scol{\pgfplotsretval}
+    \pgfplotstablegetelem{\row}{[index]2}\of\etable
+    \xdef\trow{\pgfplotsretval}
+    \pgfplotstablegetelem{\row}{[index]3}\of\etable
+    \xdef\tcol{\pgfplotsretval}
+    % Colors
+    \pgfplotstablegetelem{\row}{[index]4}\of\etable
+    \xdef\sclr{\pgfplotsretval}
+    \colorlet{cstart}{hicol!\sclr!locol}
+    \pgfplotstablegetelem{\row}{[index]5}\of\etable
+    \xdef\tclr{\pgfplotsretval}
+    \colorlet{cend}{hicol!\tclr!locol}
+    % Widths
+    \pgfplotstablegetelem{\row}{[index]6}\of\etable
+    \xdef\swidth{\minwidth + \widthmulti*\pgfplotsretval}
+    \pgfplotstablegetelem{\row}{[index]7}\of\etable
+    \xdef\twidth{\minwidth + \widthmulti*\pgfplotsretval}
+    \draw [decoration={width and color change, start color=cstart, end color=cend, start width=\swidth, end width=\twidth}, decorate] (\srow/\scol.center) to [out=-90,in=90,looseness=0.8] (\trow/\tcol.center);
+  }
 
-  \foreach \row in {0,...,\nrows}
-    \foreach \col in {0,...,\ncols}
-      \pgfplotstablegetelem{\row}{[index]\col}\of\ptable
-      \xdef\x{10*\pgfplotsretval}
-      \xdef\y{-5*\row}
-      \node [nodestyle]  () at (\x, \y) {};
+  \foreach \row in {0,...,\nrows} {
+	\pgfplotstablegetelem{\row}{[index]0}\of\ntable
+	\xdef\noderow{\pgfplotsretval}
+	\pgfplotstablegetelem{\row}{[index]1}\of\ntable
+	\xdef\nodecol{\pgfplotsretval}
+	\pgfplotstablegetelem{\row}{[index]2}\of\ntable
+	\xdef\nodepos{\pgfplotsretval}
+	\pgfplotstablegetelem{\row}{[index]3}\of\ntable
+	\xdef\nodecol{\pgfplotsretval}
+	\colorlet{col}{hicol!\nodecol!locol}
+	\pgfplotstablegetelem{\row}{[index]4}\of\ntable
+    \xdef\nodesize{\minnodesize+\nodemul*\pgfplotsretval}
+	\node [nodestyle,fill=col,minimum size=\nodesize] (\noderow/\nodecol) at (\xstretch*\nodepos, -\ystretch*\noderow) {};
+  }
 
 \end{tikzpicture}
 \end{document}
