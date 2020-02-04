@@ -4,13 +4,15 @@ import pickle as pcl
 import csv
 
 
-fname = 'HeFlatRight2'
+fname = 'HeFlatMiddle2Sign'
 #               t     i     s      col   width
 nodeformat = '{0:d} {1:d} {2:.5f} {3:d} {4:.1f}\n'
 #              t1    i1    t2    i2   col1  col2  width1  width2
 edgeformat = '{0:d} {1:d} {2:d} {3:d} {4:d} {5:d} {6:.1f} {7:.1f}\n'
-slo = -2
-shi = 2.8
+slo = -2.5
+shi = 2.5
+WMIN = 0
+IMAX = 4
 
 
 def relu(x):
@@ -37,17 +39,18 @@ def xy2str(x, y):
 
 if __name__ == '__main__':
     with open(fname + '.pcl', 'rb') as fin:
-        aouts, souts, louts, x, y = pcl.load(fin)
+        aouts, souts, louts, gouts, x, y = pcl.load(fin)
+    print(len(aouts))
     whi = np.max([np.max(np.abs(aouts[i][1:-1])) for i in range(1, len(aouts))])
     wlo = 0
     nodestring = ''
     edgestring = ''
-    maxi = 9
     with open('../' + fname + '_data.txt', 'w') as fout:
         xy = sorted(list(zip(x[0], y[0])), key=lambda x: x[0])
         writer = csv.writer(fout, delimiter=',')
         writer.writerows(xy)
-    for i in range(1, maxi):
+    nodeset = set()
+    for i in range(1, IMAX):
         #fx = np.linspace(slo, shi, 1000)
         fx = souts[i]
         fy = flatnet(fx, aouts[i], souts[i])
@@ -55,32 +58,36 @@ if __name__ == '__main__':
             writer = csv.writer(fout, delimiter=',')
             writer.writerows(zip(fx, fy))
         for j, s in enumerate(souts[i]):
-            col = 8
             if s < slo:
                 s = slo
-                col = 0
             elif s > shi:
                 s = shi
-                col = 0
             st = trans(s, slo, shi)
             w = aouts[i][j+1]
-            if col > 0:
-                if w > 0:
-                    col = 8
-                else:
-                    col = 7
-            if j == 0:
-                col = 3
+            if w > 0:
+                col = 8
+            else:
+                col = 7
             wt = trans(np.fabs(w), wlo, whi)
-            nodestring += nodeformat.format(i-1, j, st, col, wt)
-            if i < maxi-1:
-                edgestring += edgeformat.format(i-1, j, i, j, col, 8, 0.5, 0.5)
+            if wt > WMIN:
+                nodeset.add((i-1, j))
+                nodestring += nodeformat.format(i-1, j, st, col, wt)
+            if i > 1:
+                curlabels = [int(x) for x in louts[i][1]]
+                prevlabels = [int(x) for x in louts[i-1][1]]
+                thislabel = curlabels[j]
+                try:
+                    prevj = prevlabels.index(thislabel)
+                    if (i-1, j) in nodeset and (i-2, prevj) in nodeset:
+                        edgestring += edgeformat.format(i-2, prevj, i-1, j, col, 8, 0.5, 0.5)
+                except ValueError:
+                    pass
     with open('../' + fname + '_nodes.txt', 'w') as nout:
         nout.write(nodestring)
     with open('../' + fname + '_edges.txt', 'w') as nout:
         nout.write(edgestring)
     with open('../' + fname + '_times.txt', 'w') as nout:
         timestring = ''
-        for i in range(1, maxi):
+        for i in range(1, IMAX):
             timestring += '1000\n'
         nout.write(timestring)

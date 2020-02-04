@@ -11,7 +11,7 @@
 \def\axisb{\LARGE$b$}
 \newcommand\timetext[1]{\LARGE$t=#1$}
 
-\def\inputname{HeFlatRight2}
+\def\inputname{HeFlatMiddle2Sign}
 \def\xstretch{30cm}
 \def\yoff{-0.8}
 \def\ystretch{5}
@@ -168,24 +168,34 @@
   }
   }
 
+  % xmin and xmax need to be the same as in Python file
+  \def\xmin{-2.5}
+  \def\xmax{2.5}
+  % xlo and xhi are the desired limits
+  \def\xlo{-1.5}
+  \def\xhi{1.5}
+
   \foreach \rowi in {0,...,\trows} {
   \pgfmathsetmacro\row{int(\rowi + 1)}
+  \pgfmathsetmacro\xat{(\xlo-\xmin)*30/(\xmax-\xmin)}
+  \pgfmathsetmacro\xwidth{(\xhi-\xlo)*30/(\xmax-\xmin)}
   \begin{axis}[%
     anchor=south west,
-    at={(11.25cm,-\row*5cm + 4.5cm)},
+    at={(\xat*1cm,-\row*5cm + 4.5cm)},
     axis y line=none,
     axis line style={
     	Goldenrod!80!black,
-    	line width=0.3pt
+    	line width=2pt
     },
-    axis background/.style={fill=Goldenrod!12!white, opacity=0.75},
-    width=15cm,
+    axis background/.style={fill=Goldenrod!5!white, opacity=0.75},
+    width=\xwidth*1cm,
     height=3.5cm,
-    xmin=-0.2,
-    xmax=2.2,
+    xmin=\xlo,
+    xmax=\xhi,
     ymin=-1.2,
-    ymax=1.8,
+    ymax=2,
     ticks=none,
+    restrict y to domain=-10:10,
     clip mode=individual,
     clip=true,
     scale only axis
@@ -205,7 +215,7 @@
   ] table[col sep=comma] {\inputname_xy_\row.txt};
 
   \end{axis}
-}
+  }
 
 \end{tikzpicture}
 \end{document}
