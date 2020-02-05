@@ -11,8 +11,6 @@ nodeformat = '{0:d} {1:d} {2:.5f} {3:d} {4:.1f}\n'
 #              t1    i1    t2    i2   col1  col2  width1  width2
 edgeformat = '{0:d} {1:d} {2:d} {3:d} {4:d} {5:d} {6:.1f} {7:.1f}\n'
 
-FNAME = 'ComplexDeep3'
-
 
 def relu(x):
     return np.clip(x, a_min=0, a_max=None)
@@ -36,14 +34,14 @@ def xy2str(x, y):
     return fstr
 
 
-if __name__ == '__main__':
+def process_dir(dirname):
     # Remove all existing .txt files
-    allfiles = os.listdir(FNAME)
+    allfiles = os.listdir(dirname)
     for file in allfiles:
         if file.endswith('.txt'):
-            os.remove(os.path.join(FNAME, file))
+            os.remove(os.path.join(dirname, file))
     # Read and write options
-    with open(FNAME + '/options.yml') as ymlstream:
+    with open(dirname + '/options.yml') as ymlstream:
         try:
             options = yaml.safe_load(ymlstream)
         except yamlYAMLError as exception:
@@ -57,18 +55,22 @@ if __name__ == '__main__':
     XHI = options['XHI']
     YLO = options['YLO']
     YHI = options['YHI']
-    with open(FNAME + '/options.txt', 'w') as fout:
+    with open(dirname + '/options.txt', 'w') as fout:
         writer = csv.writer(fout, delimiter=' ')
         writer.writerow([str(p) for p in [SLO, SHI, XLO, XHI, YLO, YHI]])
     # Read data
-    with open(FNAME + '/' + FNAME + '.pcl', 'rb') as fin:
-        aouts, souts, louts, gouts, x, y = pcl.load(fin)
-    print(len(aouts))
+    try:
+        with open(dirname + '/' + dirname + '.pcl', 'rb') as fin:
+            aouts, souts, louts, gouts, x, y = pcl.load(fin)
+    except:
+        with open(dirname + '/' + dirname + '.pcl', 'rb') as fin:
+            aouts, souts, louts, gouts, _, x, y = pcl.load(fin)
+    print(dirname, '->', len(aouts))
     whi = np.max([np.max(np.abs(aouts[i][1:-1])) for i in range(1, len(aouts))])
     wlo = 0
     nodestring = ''
     edgestring = ''
-    with open(FNAME + '/data.txt', 'w') as fout:
+    with open(dirname + '/data.txt', 'w') as fout:
         xy = sorted(list(zip(x[0], y[0])), key=lambda x: x[0])
         writer = csv.writer(fout, delimiter=',')
         writer.writerows(xy)
@@ -84,7 +86,7 @@ if __name__ == '__main__':
             fxafter = []
         fx = np.hstack((fxbefore, souts[si], fxafter))
         fy = flatnet(fx, aouts[si], souts[si])
-        with open(FNAME + '/xy_' + str(i) + '.txt', 'w') as fout:
+        with open(dirname + '/xy_' + str(i) + '.txt', 'w') as fout:
             writer = csv.writer(fout, delimiter=',')
             writer.writerows(zip(fx, fy))
         for j, s in enumerate(souts[si]):
@@ -112,12 +114,19 @@ if __name__ == '__main__':
                         edgestring += edgeformat.format(i-1, prevj, i, j, col, 8, 0.5, 0.5)
                 except ValueError:
                     pass
-    with open(FNAME + '/nodes.txt', 'w') as nout:
+    with open(dirname + '/nodes.txt', 'w') as nout:
         nout.write(nodestring)
-    with open(FNAME + '/edges.txt', 'w') as nout:
+    with open(dirname + '/edges.txt', 'w') as nout:
         nout.write(edgestring)
-    with open(FNAME + '/times.txt', 'w') as nout:
+    with open(dirname + '/times.txt', 'w') as nout:
         timestring = ''
         for t in TLIST:
             timestring += '{0:d}\n'.format(t)
         nout.write(timestring)
+
+
+if __name__ == '__main__':
+    allfiles = os.listdir('.')
+    for file in allfiles:
+        if os.path.isdir(file):
+            process_dir(file)
