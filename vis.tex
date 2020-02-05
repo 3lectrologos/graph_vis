@@ -7,14 +7,12 @@
 
 
 % Parameters
-\def\axisa{\LARGE$a$}
-\def\axisb{\LARGE$b$}
 \newcommand\timetext[1]{\LARGE$t=#1$}
 
-\def\inputname{HeFlatMiddle2Sign}
-\def\xstretch{30cm}
-\def\yoff{-0.8}
-\def\ystretch{5}
+\def\inputname{FlatInitRightSign40}
+\def\xstretch{22}
+\def\xstretchcm{\xstretch cm}
+\def\ystretch{6}
 \def\minnodesize{5}
 \def\nodemul{15}
 \def\minwidth{0.5}
@@ -32,6 +30,8 @@
 \definecolor{col6}{HTML}{e31a1c}
 \definecolor{col7}{HTML}{004d80}
 \definecolor{col8}{HTML}{800026}
+
+\colorlet{lightgray}{gray!10!white}
 
 % Qualitative color map
 %\definecolor{col0}{HTML}{a6cee3}
@@ -87,17 +87,18 @@
 \makeatother
 
 
-\pgfplotstableread{\inputname_nodes.txt}\ntable
+\pgfplotstableread{data/\inputname/nodes.txt}\ntable
 \pgfplotstablegetrowsof{\ntable}
 \pgfmathsetmacro{\nrows}{\pgfplotsretval-1}
-\pgfplotstableread{\inputname_times.txt}\ttable
+\pgfplotstableread{data/\inputname/times.txt}\ttable
 \pgfplotstablegetrowsof{\ttable}
 \pgfmathsetmacro{\trows}{\pgfplotsretval-1}
+\pgfplotstableread{data/\inputname/options.txt}\opttable
 
 \newtoggle{plotedges}
 \toggletrue{plotedges}
 \iftoggle{plotedges}{%
-\pgfplotstableread{\inputname_edges.txt}\etable
+\pgfplotstableread{data/\inputname/edges.txt}\etable
 \pgfplotstablegetrowsof{\etable}
 \pgfmathsetmacro{\erows}{\pgfplotsretval-1}
 }
@@ -106,20 +107,33 @@
 \begin{document}
 \begin{tikzpicture}[
   scale=1,
-  nodestyle/.style={circle,draw=none,line width=0.3pt,minimum size=0pt,inner sep=0, anchor=center, opacity=0.3},
+  nodestyle/.style={circle,draw=none,line width=0.3pt,minimum size=0pt,inner sep=0, anchor=center,opacity=0.3},
   edgestyle/.style={opacity=0.3},
-  axisstyle/.style={darkgray!30!white, line width=0.6pt}
+  axisstyle/.style={|-|,darkgray!50!white,line width=1.6pt}
   ]
   
+  \pgfplotstablegetelem{0}{[index]0}\of\opttable
+  \xdef\xmin{\pgfplotsretval}
+  \pgfplotstablegetelem{0}{[index]1}\of\opttable
+  \xdef\xmax{\pgfplotsretval}
+  \pgfplotstablegetelem{0}{[index]2}\of\opttable
+  \xdef\xlo{\pgfplotsretval}
+  \pgfplotstablegetelem{0}{[index]3}\of\opttable
+  \xdef\xhi{\pgfplotsretval}
+  \pgfplotstablegetelem{0}{[index]4}\of\opttable
+  \xdef\ylo{\pgfplotsretval}
+  \pgfplotstablegetelem{0}{[index]5}\of\opttable
+  \xdef\yhi{\pgfplotsretval}
+  
   \foreach \row in {0,...,\trows} {
-	\node[minimum size=0,inner sep=0] (s\row) at (-0*\xstretch, \yoff-\ystretch*\row) {};
-	\node[minimum size=0,inner sep=0] (e\row) at (1*\xstretch, \yoff-\ystretch*\row) {};
+	\node[minimum size=0,inner sep=0] (s\row) at (-0*\xstretchcm, -\ystretch*\row) {};
+	\node[minimum size=0,inner sep=0] (e\row) at (1*\xstretchcm, -\ystretch*\row) {};
 	\draw[axisstyle] (s\row) -- (e\row);
-	\node[anchor=south] (a\row) at (-0*\xstretch, \yoff-0.8-\ystretch*\row) {\axisa};
-	\node[anchor=south] (b\row) at (1*\xstretch, \yoff-0.8-\ystretch*\row) {\axisb};
+	\node[anchor=south] (a\row) at (0, -1.0-\ystretch*\row) {\LARGE$\xmin$};
+	\node[anchor=south] (b\row) at (\xstretchcm, -1.0-\ystretch*\row) {\LARGE$\xmax$};
 	\pgfplotstablegetelem{\row}{[index]0}\of\ttable
 	\xdef\time{\pgfplotsretval}
-	\node[anchor=east] (foo\row) at (-0.5,\yoff -\ystretch*\row) {\timetext{\time}};
+	\node[anchor=east] (foo\row) at (-0.5, -\ystretch*\row) {\timetext{\time}};
   }
 
   \foreach \row in {0,...,\nrows} {
@@ -135,7 +149,7 @@
 	%\colorlet{nodecol}{hicol!\nodecolor!locol}
 	\pgfplotstablegetelem{\row}{[index]4}\of\ntable
 	\xdef\nodesize{\minnodesize+\nodemul*\pgfplotsretval}
-	\node [nodestyle,fill=nodecol,minimum size=\nodesize] (\noderow/\nodecol) at (\xstretch*\nodepos, \yoff-\ystretch*\noderow) {};
+	\node [nodestyle,fill=nodecol,minimum size=\nodesize] (\noderow/\nodecol) at (\xstretchcm*\nodepos, -\ystretch*\noderow) {};
   }
 
   \iftoggle{plotedges}{%
@@ -168,34 +182,26 @@
   }
   }
 
-  % xmin and xmax need to be the same as in Python file
-  \def\xmin{-2.5}
-  \def\xmax{2.5}
-  % xlo and xhi are the desired limits
-  \def\xlo{-1.5}
-  \def\xhi{1.5}
-
-  \foreach \rowi in {0,...,\trows} {
-  \pgfmathsetmacro\row{int(\rowi + 1)}
-  \pgfmathsetmacro\xat{(\xlo-\xmin)*30/(\xmax-\xmin)}
-  \pgfmathsetmacro\xwidth{(\xhi-\xlo)*30/(\xmax-\xmin)}
+  \foreach \row in {0,...,\trows} {
+  \pgfmathsetmacro\xat{(\xlo-\xmin)*\xstretch/(\xmax-\xmin)}
+  \pgfmathsetmacro\xwidth{(\xhi-\xlo)*\xstretch/(\xmax-\xmin)}
   \begin{axis}[%
     anchor=south west,
-    at={(\xat*1cm,-\row*5cm + 4.5cm)},
+    at={(\xat*1cm,-\row*\ystretch cm + 0.5cm)},
     axis y line=none,
     axis line style={
-    	Goldenrod!80!black,
-    	line width=2pt
+    	Goldenrod!30!black,
+    	line width=1.6pt
     },
-    axis background/.style={fill=Goldenrod!5!white, opacity=0.75},
+    axis background/.style={fill=white!10!lightgray, opacity=0.8},
     width=\xwidth*1cm,
     height=3.5cm,
     xmin=\xlo,
     xmax=\xhi,
-    ymin=-1.2,
-    ymax=2,
+    ymin=\ylo,
+    ymax=\yhi,
     ticks=none,
-    restrict y to domain=-10:10,
+    restrict y to domain=-20:20,
     clip mode=individual,
     clip=true,
     scale only axis
@@ -206,13 +212,13 @@
     mark=square*,
     mark size=5pt,
     mark options={darkgray}
-  ] table[col sep=comma] {\inputname_data.txt};
+  ] table[col sep=comma] {data/\inputname/data.txt};
 
   \addplot[%
     mark=none,
-    darkgray!70!Goldenrod,
+    darkgray!40!Goldenrod,
     line width=2.5pt
-  ] table[col sep=comma] {\inputname_xy_\row.txt};
+  ] table[col sep=comma] {data/\inputname/xy_\row.txt};
 
   \end{axis}
   }
