@@ -41,7 +41,7 @@ def process_dir(dirname):
         if file.endswith('.txt'):
             os.remove(os.path.join(dirname, file))
     # Read and write options
-    with open(dirname + '/options.yml') as ymlstream:
+    with open(os.path.join(dirname, 'options.yml'), 'r') as ymlstream:
         try:
             options = yaml.safe_load(ymlstream)
         except yamlYAMLError as exception:
@@ -55,22 +55,22 @@ def process_dir(dirname):
     XHI = options['XHI']
     YLO = options['YLO']
     YHI = options['YHI']
-    with open(dirname + '/options.txt', 'w') as fout:
+    with open(os.path.join(dirname, 'options.txt'), 'w') as fout:
         writer = csv.writer(fout, delimiter=' ')
         writer.writerow([str(p) for p in [SLO, SHI, XLO, XHI, YLO, YHI]])
     # Read data
     try:
-        with open(dirname + '/' + dirname + '.pcl', 'rb') as fin:
+        with open(os.path.join(dirname, dirname + '.pcl'), 'rb') as fin:
             aouts, souts, louts, gouts, x, y = pcl.load(fin)
     except:
-        with open(dirname + '/' + dirname + '.pcl', 'rb') as fin:
+        with open(os.path.join(dirname, dirname + '.pcl'), 'rb') as fin:
             aouts, souts, louts, gouts, _, x, y = pcl.load(fin)
     print(dirname, '->', len(aouts))
     whi = np.max([np.max(np.abs(aouts[i][1:-1])) for i in range(1, len(aouts))])
     wlo = 0
     nodestring = ''
     edgestring = ''
-    with open(dirname + '/data.txt', 'w') as fout:
+    with open(os.path.join(dirname, 'data.txt'), 'w') as fout:
         xy = sorted(list(zip(x[0], y[0])), key=lambda x: x[0])
         writer = csv.writer(fout, delimiter=',')
         writer.writerows(xy)
@@ -86,7 +86,7 @@ def process_dir(dirname):
             fxafter = []
         fx = np.hstack((fxbefore, souts[si], fxafter))
         fy = flatnet(fx, aouts[si], souts[si])
-        with open(dirname + '/xy_' + str(i) + '.txt', 'w') as fout:
+        with open(os.path.join(dirname, 'xy_' + str(i) + '.txt'), 'w') as fout:
             writer = csv.writer(fout, delimiter=',')
             writer.writerows(zip(fx, fy))
         for j, s in enumerate(souts[si]):
@@ -114,11 +114,11 @@ def process_dir(dirname):
                         edgestring += edgeformat.format(i-1, prevj, i, j, col, 8, 0.5, 0.5)
                 except ValueError:
                     pass
-    with open(dirname + '/nodes.txt', 'w') as nout:
+    with open(os.path.join(dirname, 'nodes.txt'), 'w') as nout:
         nout.write(nodestring)
-    with open(dirname + '/edges.txt', 'w') as nout:
+    with open(os.path.join(dirname, 'edges.txt'), 'w') as nout:
         nout.write(edgestring)
-    with open(dirname + '/times.txt', 'w') as nout:
+    with open(os.path.join(dirname, 'times.txt'), 'w') as nout:
         timestring = ''
         for t in TLIST:
             timestring += '{0:d}\n'.format(t)
