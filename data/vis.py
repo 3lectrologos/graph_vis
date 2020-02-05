@@ -48,7 +48,8 @@ def process_dir(dirname):
             print(exception)
     ILIST = options['ILIST']
     TLIST = options['TLIST']
-    WMIN = options['WMIN']
+    #WMIN = options['WMIN']
+    WMIN = 0.0001
     SLO = options['SLO']
     SHI = options['SHI']
     XLO = options['XLO']
@@ -61,12 +62,17 @@ def process_dir(dirname):
     # Read data
     try:
         with open(os.path.join(dirname, dirname + '.pcl'), 'rb') as fin:
-            aouts, souts, louts, gouts, x, y = pcl.load(fin)
+            aouts, souts, louts, x, y = pcl.load(fin)
     except:
-        with open(os.path.join(dirname, dirname + '.pcl'), 'rb') as fin:
-            aouts, souts, louts, gouts, _, x, y = pcl.load(fin)
+        try:
+            with open(os.path.join(dirname, dirname + '.pcl'), 'rb') as fin:
+                aouts, souts, louts, gouts, x, y = pcl.load(fin)
+        except:
+            with open(os.path.join(dirname, dirname + '.pcl'), 'rb') as fin:
+                aouts, souts, louts, gouts, _, x, y = pcl.load(fin)
     print(dirname, '->', len(aouts))
-    whi = np.max([np.max(np.abs(aouts[i][1:-1])) for i in range(1, len(aouts))])
+    print(np.max([np.max(np.abs(aouts[i][1:-1])) for i in range(1, len(aouts))]))
+    whi = 10#np.max([np.max(np.abs(aouts[i][1:-1])) for i in range(1, len(aouts))])
     wlo = 0
     nodestring = ''
     edgestring = ''
@@ -103,8 +109,8 @@ def process_dir(dirname):
             wt = trans(np.fabs(w), wlo, whi)
             if wt > WMIN:
                 nodeset.add((i, j))
-                nodestring += nodeformat.format(i, j, st, col, wt)
-            if i > 0:
+                nodestring += nodeformat.format(i, j, st, int(louts[si][0][j]), wt)
+            if False:
                 curlabels = [int(x) for x in louts[si][1]]
                 prevlabels = [int(x) for x in louts[si-1][1]]
                 thislabel = curlabels[j]
@@ -121,7 +127,7 @@ def process_dir(dirname):
     with open(os.path.join(dirname, 'times.txt'), 'w') as nout:
         timestring = ''
         for t in TLIST:
-            timestring += '{0:d}\n'.format(t)
+            timestring += '{0}\n'.format(t)
         nout.write(timestring)
 
 
