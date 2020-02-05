@@ -11,7 +11,7 @@ nodeformat = '{0:d} {1:d} {2:.5f} {3:d} {4:.1f}\n'
 #              t1    i1    t2    i2   col1  col2  width1  width2
 edgeformat = '{0:d} {1:d} {2:d} {3:d} {4:d} {5:d} {6:.1f} {7:.1f}\n'
 
-FNAME = 'FlatInitRightSign40'
+FNAME = 'ComplexDeep3'
 
 
 def relu(x):
@@ -74,8 +74,14 @@ if __name__ == '__main__':
         writer.writerows(xy)
     nodeset = set()
     for i, si in enumerate(ILIST):
-        fxbefore = np.linspace(-5, souts[si][0], 10)
-        fxafter = np.linspace(souts[si][-1], 5, 10)
+        if SLO < souts[si][0]:
+            fxbefore = np.linspace(SLO, souts[si][0], 10)
+        else:
+            fxbefore = []
+        if SHI > souts[si][-1]:
+            fxafter = np.linspace(souts[si][-1], SHI, 10)
+        else:
+            fxafter = []
         fx = np.hstack((fxbefore, souts[si], fxafter))
         fy = flatnet(fx, aouts[si], souts[si])
         with open(FNAME + '/xy_' + str(i) + '.txt', 'w') as fout:
