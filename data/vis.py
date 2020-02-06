@@ -96,10 +96,12 @@ def process_dir(dirname):
             writer = csv.writer(fout, delimiter=',')
             writer.writerows(zip(fx, fy))
         for j, s in enumerate(souts[si]):
-            if s < SLO:
-                s = SLO
-            elif s > SHI:
-                s = SHI
+            #if s < SLO:
+            #    s = SLO
+            #elif s > SHI:
+            #    s = SHI
+            if s < SLO or s > SHI:
+                continue
             st = trans(s, SLO, SHI)
             w = aouts[si][j+1]
             if w > 0:
@@ -126,8 +128,8 @@ def process_dir(dirname):
         nout.write(edgestring)
     with open(os.path.join(dirname, 'times.txt'), 'w') as nout:
         timestring = ''
-        for t in TLIST:
-            timestring += '{0}\n'.format(t)
+        for i in ILIST:
+            timestring += '{0}\n'.format(TLIST[i])
         nout.write(timestring)
 
 

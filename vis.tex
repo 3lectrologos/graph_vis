@@ -1,7 +1,7 @@
 \documentclass{standalone}
 \PassOptionsToPackage{dvipsnames}{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{decorations,positioning,fadings,through,spy}
+\usetikzlibrary{decorations,positioning,fadings,through,arrows.meta}
 \usepackage{pgfplotstable}
 \usepackage{etoolbox}
 
@@ -9,10 +9,10 @@
 % Parameters
 \newcommand\timetext[1]{\LARGE#1}
 
-\def\inputname{ComplexDeepFinal}
+\def\inputname{HeDeepLeftSign40}
 \def\xstretch{22}
 \def\xstretchcm{\xstretch cm}
-\def\ystretch{7.5}
+\def\ystretch{5.5}
 \def\minnodesize{5}
 \def\nodemul{5}
 \def\nodeopacity{0.5}
@@ -132,17 +132,37 @@
   \pgfplotstablegetelem{0}{[index]5}\of\opttable
   \xdef\yhi{\pgfplotsretval}
   
-  \node[circle,draw=darkgray,fill=lightgray!50!white,line width=1pt,anchor=center,minimum size=45pt] (foo) at (-1.3, \ystretch-2) {\LARGE Epochs};
+  % epoch text node
+  \node[draw=darkgray!70!white,fill=lightgray!50!white,line width=1pt,anchor=north,inner sep=10pt] (foo) at (-1.5, \ystretch-1.17) {\LARGE Epochs};
   
+  % axes and epoch number nodes
   \foreach \row in {0,...,\trows} {
 	\node[minimum size=0,inner sep=0] (s\row) at (-0*\xstretchcm, -\ystretch*\row) {};
 	\node[minimum size=0,inner sep=0] (e\row) at (1*\xstretchcm, -\ystretch*\row) {};
 	\draw[axisstyle] (s\row) -- (e\row);
-	\node[anchor=south] (a\row) at (0, -1.0-\ystretch*\row) {\LARGE$\xmin$};
-	\node[anchor=south] (b\row) at (\xstretchcm, -1.0-\ystretch*\row) {\LARGE$\xmax$};
 	\pgfplotstablegetelem{\row}{[index]0}\of\ttable
 	\xdef\time{\pgfplotsretval}
-	\node[circle,draw=darkgray,fill=lightgray!50!white,line width=1pt,anchor=center,minimum size=45pt] (foo\row) at (-1.3, 2-\ystretch*\row) {\timetext{\time}};
+	\node[circle,draw=darkgray!70!white,fill=lightgray!50!white,line width=1pt,anchor=center,minimum size=40pt] (foo\row) at (-1.5, 2.15-\ystretch*\row) {\timetext{\time}};
+  }
+
+  % xmin xmax
+  \node[anchor=south] (a0) at (0, -1.0-\ystretch*0) {\LARGE$\xmin$};
+  \node[anchor=south] (b0) at (\xstretchcm, -1.0-\ystretch*0) {\LARGE$\xmax$};
+  \pgfmathsetmacro\zat{\xstretch*(-\xmin/(\xmax-\xmin)}
+  \node[anchor=south] (z0) at (\zat cm, -1.0-\ystretch*0) {\LARGE$0$};
+
+  % epoch lines
+  \def\tipwl{8pt}
+  \node[draw=none, below=2cm of foo0] (afterfoo0) {};
+  \draw[-,darkgray!70!white,line width=1pt] (foo) -- (foo0.north);
+  \draw[-{Turned Square[open,length=\tipwl,width=\tipwl]},darkgray!70!white,line width=1pt] (foo0) -- (afterfoo0.north);
+  \foreach \row in {1,...,\trows} {
+    \pgfmathsetmacro\prevrow{int(\row-1)}
+  	\node[draw=none, above=1.7cm of foo\row] (beforefoo\row) {};
+  	\node[draw=none, below=1.7cm of foo\row] (afterfoo\row) {};
+  	\draw[{Turned Square[open,length=\tipwl,width=\tipwl]}-,darkgray!70!white,line width=1pt] (beforefoo\row) -- (foo\row.north);
+  	\draw[-{Turned Square[open,length=\tipwl,width=\tipwl]},darkgray!70!white,line width=1pt] (foo\row) -- (afterfoo\row.north);
+  	
   }
 
   \foreach \row in {0,...,\nrows} {
@@ -199,12 +219,12 @@
     at={(\xat*1cm,-\row*\ystretch cm + 0.5cm)},
     axis y line=none,
     axis line style={
-    	Goldenrod!30!black,
-    	line width=1.6pt
+    	darkgray!80!white,
+    	line width=1pt
     },
     axis background/.style={fill=white!10!lightgray, opacity=0.8},
     width=\xwidth*1cm,
-    height=3.5cm,
+    height=3.8cm,
     xmin=\xlo,
     xmax=\xhi,
     ymin=\ylo,
@@ -216,24 +236,24 @@
     scale only axis
   ]
 
-  \node[draw=black,fill=white!80!lightgray,minimum height=0.9cm,text width=2.4cm,anchor=south west] (zoom\row) at (axis cs: -0.15,-9.5) {};
-  \node[draw=none,above=2cm of zoom\row] (bzoom\row) {};
-  \draw[black] (zoom\row) -- (bzoom\row);
+  %\node[draw=black,fill=white!80!lightgray,minimum height=0.9cm,text width=2.4cm,anchor=south west] (zoom\row) at (axis cs: -0.15,-9.5) {};
+  %\node[draw=none,above=2cm of zoom\row] (bzoom\row) {};
+  %\draw[black] (zoom\row) -- (bzoom\row);
   
   \addplot[%
     only marks,
     mark=square*,
-    mark size=3pt,
+    mark size=5pt,
     mark options={darkgray}
   ] table[col sep=comma] {data/\inputname/data.txt};
 
   \addplot[%
     mark=none,
     darkgray!40!Goldenrod,
-    line width=2pt
+    line width=3pt
   ] table[col sep=comma] {data/\inputname/xy_\row.txt};
   
-  \node[draw=black,fill=none,minimum height=0.9cm,text width=2.4cm,anchor=south west] (czoom\row) at (axis cs: -0.15,-9.5) {};
+  %\node[draw=black,fill=none,minimum height=0.9cm,text width=2.4cm,anchor=south west] (czoom\row) at (axis cs: -0.15,-9.5) {};
 
   \end{axis}
   }
@@ -245,52 +265,52 @@
   \xdef\ylo{-1.5}
   \xdef\yhi{2}
   
-  \foreach \row in {0,...,\trows} {
-	\pgfmathsetmacro\xat{(\xlo-\xmin)*10/(\xmax-\xmin)}
-	\pgfmathsetmacro\xwidth{(\xhi-\xlo)*10/(\xmax-\xmin)}
-  	
-	\begin{axis}[%
-	anchor=south west,
-	at={(\xat*1cm + 6.2cm,-\row*\ystretch cm + 3.2cm)},
-	%axis y line=none,
-	axis line style={
-		black,
-		line width=0.6pt
-	},
-	axis background/.style={
-		fill=white!80!lightgray,
-		opacity=1.0,
-	},
-	width=\xwidth*1cm,
-	height=3.2cm,
-	xmin=\xlo,
-	xmax=\xhi,
-	ymin=\ylo,
-	ymax=\yhi,
-	ticks=none,
-	restrict y to domain=-100:100,
-	clip mode=individual,
-	clip=true,
-	scale only axis,
-	axis on top
-	]
-  	
-	\addplot[%
-	only marks,
-	mark=square*,
-	mark size=5pt,
-	mark options={darkgray}
-	] table[col sep=comma] {data/\inputname/data.txt};
-	
-	\addplot[%
-	mark=none,
-	darkgray!40!Goldenrod,
-	line width=3pt
-	] table[col sep=comma] {data/\inputname/xy_\row.txt};
-	
-	\end{axis}
-	
-  }
+%  \foreach \row in {0,...,\trows} {
+%	\pgfmathsetmacro\xat{(\xlo-\xmin)*10/(\xmax-\xmin)}
+%	\pgfmathsetmacro\xwidth{(\xhi-\xlo)*10/(\xmax-\xmin)}
+%  	
+%	\begin{axis}[%
+%	anchor=south west,
+%	at={(\xat*1cm + 6.2cm,-\row*\ystretch cm + 3.2cm)},
+%	%axis y line=none,
+%	axis line style={
+%		black,
+%		line width=0.6pt
+%	},
+%	axis background/.style={
+%		fill=white!80!lightgray,
+%		opacity=1.0,
+%	},
+%	width=\xwidth*1cm,
+%	height=3.2cm,
+%	xmin=\xlo,
+%	xmax=\xhi,
+%	ymin=\ylo,
+%	ymax=\yhi,
+%	ticks=none,
+%	restrict y to domain=-100:100,
+%	clip mode=individual,
+%	clip=true,
+%	scale only axis,
+%	axis on top
+%	]
+%  	
+%	\addplot[%
+%	only marks,
+%	mark=square*,
+%	mark size=5pt,
+%	mark options={darkgray}
+%	] table[col sep=comma] {data/\inputname/data.txt};
+%	
+%	\addplot[%
+%	mark=none,
+%	darkgray!40!Goldenrod,
+%	line width=3pt
+%	] table[col sep=comma] {data/\inputname/xy_\row.txt};
+%	
+%	\end{axis}
+%	
+%  }
 
 \end{tikzpicture}
 \end{document}
