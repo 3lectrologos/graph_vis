@@ -70,15 +70,9 @@ def process_dir(dirname):
         try:
             with open(os.path.join(dirname, dirname + '.pcl'), 'rb') as fin:
                 aouts, souts, louts, gouts, x, y = pcl.load(fin)
-                print('-----')
-                print('slens =', [len(si) for si in souts])
-                print('glens =', [len(gi) for gi in gouts])
         except:
             with open(os.path.join(dirname, dirname + '.pcl'), 'rb') as fin:
                 aouts, souts, louts, gouts, _, x, y = pcl.load(fin)
-                print('-----')
-                print('slens =', [len(si) for si in souts])
-                print('glens =', [len(gi) for gi in gouts])
     print(dirname, '->', len(aouts))
     print(np.max([np.max(np.abs(aouts[i][1:-1])) for i in range(1, len(aouts))]))
     print('-----')
@@ -92,15 +86,9 @@ def process_dir(dirname):
         writer.writerows(xy)
     nodeset = set()
     for i, si in enumerate(ILIST):
-        if SLO < souts[si][0]:
-            fxbefore = np.linspace(SLO, souts[si][0], 10)
-        else:
-            fxbefore = []
-        if SHI > souts[si][-1]:
-            fxafter = np.linspace(souts[si][-1], SHI, 10)
-        else:
-            fxafter = []
-        fx = np.hstack((fxbefore, souts[si], fxafter))
+        extra = np.linspace(SLO, SHI, 100)
+        orig = np.copy(souts[si])
+        fx = np.sort(np.hstack((orig, extra)))
         fy = flatnet(fx, aouts[si], souts[si])
         with open(os.path.join(dirname, 'xy_' + str(i) + '.txt'), 'w') as fout:
             writer = csv.writer(fout, delimiter=',')

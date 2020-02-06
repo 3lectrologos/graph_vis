@@ -238,6 +238,12 @@
 
   \addplot[%
     mark=none,
+    fline!10!white,
+    line width=4pt
+  ] table[col sep=comma] {data/\inputname/xy_\row.txt};
+
+  \addplot[%
+    mark=none,
     fline,
     line width=3pt
   ] table[col sep=comma] {data/\inputname/xy_\row.txt};
