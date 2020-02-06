@@ -2,9 +2,9 @@
 ILIST: [0, 3, 7, 12, 17]
 TLIST: [0, 100, 300, 1k, 2k, 3k, 4k, 5k, 6k, 7k, 8k, 9k, 10k, 11k, 12k, 13k, 14k, 15k, 115k, 135k]
 WMIN: 0.0
-SLO: -2.7
-SHI: 0.7
-XLO: -2.7
-XHI: 0.7
-YLO: -1.6
-YHI: 1.6
+SLO: -2.5
+SHI: 0.5
+XLO: -2.5
+XHI: 0.5
+YLO: -2
+YHI: 2.4

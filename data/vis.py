@@ -48,14 +48,17 @@ def process_dir(dirname):
             print(exception)
     ILIST = options['ILIST']
     TLIST = options['TLIST']
-    #WMIN = options['WMIN']
-    WMIN = 0.0001
+    WMIN = options['WMIN']
     SLO = options['SLO']
     SHI = options['SHI']
     XLO = options['XLO']
     XHI = options['XHI']
     YLO = options['YLO']
     YHI = options['YHI']
+    try:
+        PLOTEDGES = options['PLOTEDGES']
+    except:
+        PLOTEDGES = False
     with open(os.path.join(dirname, 'options.txt'), 'w') as fout:
         writer = csv.writer(fout, delimiter=' ')
         writer.writerow([str(p) for p in [SLO, SHI, XLO, XHI, YLO, YHI]])
@@ -67,11 +70,18 @@ def process_dir(dirname):
         try:
             with open(os.path.join(dirname, dirname + '.pcl'), 'rb') as fin:
                 aouts, souts, louts, gouts, x, y = pcl.load(fin)
+                print('-----')
+                print('slens =', [len(si) for si in souts])
+                print('glens =', [len(gi) for gi in gouts])
         except:
             with open(os.path.join(dirname, dirname + '.pcl'), 'rb') as fin:
                 aouts, souts, louts, gouts, _, x, y = pcl.load(fin)
+                print('-----')
+                print('slens =', [len(si) for si in souts])
+                print('glens =', [len(gi) for gi in gouts])
     print(dirname, '->', len(aouts))
     print(np.max([np.max(np.abs(aouts[i][1:-1])) for i in range(1, len(aouts))]))
+    print('-----')
     whi = 10#np.max([np.max(np.abs(aouts[i][1:-1])) for i in range(1, len(aouts))])
     wlo = 0
     nodestring = ''
@@ -104,22 +114,34 @@ def process_dir(dirname):
                 continue
             st = trans(s, SLO, SHI)
             w = aouts[si][j+1]
-            if w > 0:
-                col = 8
+            if PLOTEDGES:
+                # if i == 0:
+                #     col = 0
+                # else:
+                #     if gouts[si-1][j] == 1:
+                #         col = 8
+                #     elif gouts[si-1][j] == -1:
+                #         col = 7
+                #     else:
+                #         print('Problem')
+                if w > 0:
+                    col = 8
+                else:
+                    col = 7
             else:
-                col = 7
+                col = int(louts[si][0][j])
             wt = trans(np.fabs(w), wlo, whi)
             if wt > WMIN:
                 nodeset.add((i, j))
-                nodestring += nodeformat.format(i, j, st, int(louts[si][0][j]), wt)
-            if False:
+                nodestring += nodeformat.format(i, j, st, col, wt)
+            if PLOTEDGES and i > 0:
                 curlabels = [int(x) for x in louts[si][1]]
-                prevlabels = [int(x) for x in louts[si-1][1]]
+                prevlabels = [int(x) for x in louts[ILIST[i-1]][1]]
                 thislabel = curlabels[j]
                 try:
                     prevj = prevlabels.index(thislabel)
                     if (i, j) in nodeset and (i-1, prevj) in nodeset:
-                        edgestring += edgeformat.format(i-1, prevj, i, j, col, 8, 0.5, 0.5)
+                        edgestring += edgeformat.format(i-1, prevj, i, j, col, col, 0.5, 0.5)
                 except ValueError:
                     pass
     with open(os.path.join(dirname, 'nodes.txt'), 'w') as nout:

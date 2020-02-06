@@ -6,56 +6,8 @@
 \usepackage{etoolbox}
 
 
-% Parameters
-\newcommand\timetext[1]{\LARGE#1}
-
-\def\inputname{HeDeepLeftSign40}
-\def\xstretch{22}
-\def\xstretchcm{\xstretch cm}
-\def\ystretch{5.5}
-\def\minnodesize{5}
-\def\nodemul{5}
-\def\nodeopacity{0.5}
-\def\minwidth{0.5}
-\def\widthmulti{1}
-\def\edgeopacity{0.3}
-\colorlet{locol}{darkgray!30!white}
-\colorlet{hicol}{RoyalPurple}
-
-% Sequential color map
-%\definecolor{col0}{HTML}{ffffcc}
-%\definecolor{col1}{HTML}{ffeda0}
-%\definecolor{col2}{HTML}{fed976}
-%\definecolor{col3}{HTML}{000000}
-%\definecolor{col4}{HTML}{fd8d3c}
-%\definecolor{col5}{HTML}{fc4e2a}
-%\definecolor{col6}{HTML}{e31a1c}
-%\definecolor{col7}{HTML}{004d80}
-%\definecolor{col8}{HTML}{800026}
-
-\colorlet{lightgray}{gray!10!white}
-
-% Qualitative color map
-%\definecolor{col0}{HTML}{a6cee3}
-%\definecolor{col1}{HTML}{1f78b4}
-%\definecolor{col2}{HTML}{b2df8a}
-%\definecolor{col3}{HTML}{33a02c}
-%\definecolor{col4}{HTML}{fb9a99}
-%\definecolor{col5}{HTML}{e31a1c}
-%\definecolor{col6}{HTML}{fdbf6f}
-%\definecolor{col7}{HTML}{ff7f00}
-%\definecolor{col8}{HTML}{cab2d6}
-
-\definecolor{col0}{HTML}{7b3294}
-\definecolor{col1}{HTML}{0571b0}
-\definecolor{col2}{HTML}{ca0020}
-\definecolor{col3}{HTML}{008837}
-
-\newcommand\col[1]{col#1}
-
 % https://tex.stackexchange.com/questions/14283/stroke-with-variable-thickness
 \makeatletter
-
 \pgfkeys{/pgf/decoration/.cd,
 	start color/.store in =\startcolor,
 	end color/.store in   =\endcolor,
@@ -70,7 +22,7 @@
 		\def\x{0}%
 	}]{}
 	\state{line}[width=0.5pt,
-	  persistent postcomputation={%
+	persistent postcomputation={%
 		\pgfmathadd@{\x}{\increment}%
 		\let\x=\pgfmathresult%
 	}]{%
@@ -85,14 +37,50 @@
 	\state{final}{%
 		\pgfsetlinewidth{\endwidth}%
 		\pgfpathmoveto{\pgfpointorigin}%
-        %\pgfpathlineto{\pgfpointdecoratedpathlast\advance\pgf@... by2.0\pgflinewidth}%
+		%\pgfpathlineto{\pgfpointdecoratedpathlast\advance\pgf@... by2.0\pgflinewidth}%
 		\color{\endcolor!\x!\startcolor}%
 		\pgfusepath{stroke}% 
 	}
 }
-
 \makeatother
 
+% Parameters
+\newcommand\timetext[1]{\LARGE#1}
+
+%\def\inputname{FlatInitRight}
+%\def\inputname{ComplexFlatBig}
+%\def\inputname{ComplexDeepBig}
+%\def\inputname{HeDeepLeft}
+%\def\inputname{HeDeepMiddle}
+\def\inputname{HeDeepRight}
+
+\def\xstretch{15}
+\def\xstretchcm{\xstretch cm}
+\def\ystretch{5.5}
+\def\minnodesize{5}
+\def\nodemul{5}
+\def\nodeopacity{0.6}
+\def\minwidth{0.5}
+\def\widthmulti{1}
+\def\edgeopacity{0.3}
+\colorlet{locol}{darkgray!30!white}
+\colorlet{hicol}{RoyalPurple}
+
+
+\definecolor{col7}{HTML}{0495f5}
+\definecolor{col8}{HTML}{ed5300}
+
+\definecolor{col0}{HTML}{5506ff}
+\definecolor{col1}{HTML}{e3009f}
+\definecolor{col2}{HTML}{ffbb00}
+\definecolor{col3}{HTML}{90c901}
+
+% Axis-function colors
+\colorlet{lightgray}{gray!10!white}
+\definecolor{fline}{HTML}{6d87a1}
+\colorlet{fbg}{white!15!lightgray}
+
+\newcommand\col[1]{col#1}
 
 \pgfplotstableread{data/\inputname/nodes.txt}\ntable
 \pgfplotstablegetrowsof{\ntable}
@@ -142,7 +130,7 @@
 	\draw[axisstyle] (s\row) -- (e\row);
 	\pgfplotstablegetelem{\row}{[index]0}\of\ttable
 	\xdef\time{\pgfplotsretval}
-	\node[circle,draw=darkgray!70!white,fill=lightgray!50!white,line width=1pt,anchor=center,minimum size=40pt] (foo\row) at (-1.5, 2.15-\ystretch*\row) {\timetext{\time}};
+	\node[circle,draw=darkgray!70!white,fill=white!50!lightgray,line width=1pt,anchor=center,minimum size=40pt] (foo\row) at (-1.5, 2.15-\ystretch*\row) {\timetext{\time}};
   }
 
   % xmin xmax
@@ -153,13 +141,14 @@
 
   % epoch lines
   \def\tipwl{8pt}
-  \node[draw=none, below=2cm of foo0] (afterfoo0) {};
+  \def\heightpm{1.6cm}
+  \node[draw=none, below=\heightpm of foo0] (afterfoo0) {};
   \draw[-,darkgray!70!white,line width=1pt] (foo) -- (foo0.north);
   \draw[-{Turned Square[open,length=\tipwl,width=\tipwl]},darkgray!70!white,line width=1pt] (foo0) -- (afterfoo0.north);
   \foreach \row in {1,...,\trows} {
     \pgfmathsetmacro\prevrow{int(\row-1)}
-  	\node[draw=none, above=1.7cm of foo\row] (beforefoo\row) {};
-  	\node[draw=none, below=1.7cm of foo\row] (afterfoo\row) {};
+  	\node[draw=none, above=\heightpm of foo\row] (beforefoo\row) {};
+  	\node[draw=none, below=\heightpm of foo\row] (afterfoo\row) {};
   	\draw[{Turned Square[open,length=\tipwl,width=\tipwl]}-,darkgray!70!white,line width=1pt] (beforefoo\row) -- (foo\row.north);
   	\draw[-{Turned Square[open,length=\tipwl,width=\tipwl]},darkgray!70!white,line width=1pt] (foo\row) -- (afterfoo\row.north);
   	
@@ -222,7 +211,7 @@
     	darkgray!80!white,
     	line width=1pt
     },
-    axis background/.style={fill=white!10!lightgray, opacity=0.8},
+    axis background/.style={fill=fbg, opacity=0.8},
     width=\xwidth*1cm,
     height=3.8cm,
     xmin=\xlo,
@@ -249,7 +238,7 @@
 
   \addplot[%
     mark=none,
-    darkgray!40!Goldenrod,
+    fline,
     line width=3pt
   ] table[col sep=comma] {data/\inputname/xy_\row.txt};
   

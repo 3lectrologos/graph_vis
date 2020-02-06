@@ -1,0 +1,10 @@
+ILIST: [0, 3, 8, 10]
+TLIST: [0, 10, 30, 60, 100, 150, 250, 450, 1k, 2k, 12k]
+WMIN: 0.0
+SLO: -0.5
+SHI: 2.5
+XLO: -0.5
+XHI: 2.5
+YLO: -2
+YHI: 2.4
+PLOTEDGES: True

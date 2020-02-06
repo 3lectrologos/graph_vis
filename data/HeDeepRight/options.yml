@@ -1,0 +1,9 @@
+ILIST: [0, 3, 6, 9, 12]
+TLIST: [0, 100, 300, 1k, 2k, 3k, 4k, 5k, 6k, 7k, 8k, 9k, 10k]
+WMIN: 0.0
+SLO: -0.5
+SHI: 2.5
+XLO: -0.5
+XHI: 2.5
+YLO: -2
+YHI: 2.4
