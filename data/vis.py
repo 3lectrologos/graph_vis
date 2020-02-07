@@ -44,7 +44,7 @@ def process_dir(dirname):
     with open(os.path.join(dirname, 'options.yml'), 'r') as ymlstream:
         try:
             options = yaml.safe_load(ymlstream)
-        except yamlYAMLError as exception:
+        except yaml.YAMLError as exception:
             print(exception)
     ILIST = options['ILIST']
     TLIST = options['TLIST']

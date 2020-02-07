@@ -1,10 +1,24 @@
 \documentclass{standalone}
 \PassOptionsToPackage{dvipsnames}{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{decorations,positioning,fadings,through,arrows.meta}
+\usetikzlibrary{decorations,positioning,fadings,through,arrows.meta,shadows}
 \usepackage{pgfplotstable}
 \usepackage{etoolbox}
+\usepackage{bm}
 
+
+\newcommand{\Plus}{%
+\mathord{%
+\begin{tikzpicture}[baseline=0ex, line width=2, scale=0.25]
+\draw (1,0) -- (1,2);
+\draw (0,1) -- (2,1);
+\end{tikzpicture}}}
+
+\newcommand{\Minus}{%
+\mathord{%
+\begin{tikzpicture}[baseline=1ex, line width=2, scale=0.25]
+\draw (0,1) -- (2,1);
+\end{tikzpicture}}}
 
 % https://tex.stackexchange.com/questions/14283/stroke-with-variable-thickness
 \makeatletter
@@ -47,12 +61,15 @@
 % Parameters
 \newcommand\timetext[1]{\LARGE#1}
 
+%\def\inputname{FlatInitLinearRight}
+%\def\inputname{HeFlatRight}
 %\def\inputname{FlatInitRight}
-%\def\inputname{ComplexFlatBig}
+\def\inputname{ComplexFlatBig}
+
 %\def\inputname{ComplexDeepBig}
 %\def\inputname{HeDeepLeft}
 %\def\inputname{HeDeepMiddle}
-\def\inputname{HeDeepRight}
+%\def\inputname{HeDeepRight}
 
 \def\xstretch{15}
 \def\xstretchcm{\xstretch cm}
@@ -91,7 +108,7 @@
 \pgfplotstableread{data/\inputname/options.txt}\opttable
 
 \newtoggle{plotedges}
-\togglefalse{plotedges}
+\toggletrue{plotedges}
 \iftoggle{plotedges}{%
 \pgfplotstableread{data/\inputname/edges.txt}\etable
 \pgfplotstablegetrowsof{\etable}
@@ -104,7 +121,10 @@
   scale=1,
   nodestyle/.style={circle,draw=none,line width=0.3pt,minimum size=0pt,inner sep=0, anchor=center,opacity=\nodeopacity},
   edgestyle/.style={opacity=\edgeopacity},
-  axisstyle/.style={|-|,darkgray!50!white,line width=1.6pt}
+  axisstyle/.style={|-|,darkgray!50!white,line width=1.6pt},
+  ashadow/.style={opacity=0.25,shadow xshift=0.08,shadow yshift=-0.1},
+  nodeshadow/.style={drop shadow={ashadow, color=white!60!black}},
+  lineshadow/.style={preaction={transform canvas={shift={(0.06,-0.08)}},draw=white!60!black,thick,opacity=0.25}}
   ]
   
   \pgfplotstablegetelem{0}{[index]0}\of\opttable
@@ -120,8 +140,11 @@
   \pgfplotstablegetelem{0}{[index]5}\of\opttable
   \xdef\yhi{\pgfplotsretval}
   
+  \colorlet{epochfill}{white}
+  
   % epoch text node
-  \node[draw=darkgray!70!white,fill=lightgray!50!white,line width=1pt,anchor=north,inner sep=10pt] (foo) at (-1.5, \ystretch-1.17) {\LARGE Epochs};
+  \node[draw=darkgray!70!white,fill=epochfill,line width=1pt,anchor=north,inner sep=8pt] (bar) at (-0.7, \ystretch-0.7) {\LARGE Epochs};
+  \node[draw=none,inner sep=8pt,anchor=north] (foo) at (-1.2, \ystretch-0.7) {};
   
   % axes and epoch number nodes
   \foreach \row in {0,...,\trows} {
@@ -130,7 +153,7 @@
 	\draw[axisstyle] (s\row) -- (e\row);
 	\pgfplotstablegetelem{\row}{[index]0}\of\ttable
 	\xdef\time{\pgfplotsretval}
-	\node[circle,draw=darkgray!70!white,fill=white!50!lightgray,line width=1pt,anchor=center,minimum size=40pt] (foo\row) at (-1.5, 2.15-\ystretch*\row) {\timetext{\time}};
+	\node[circle,draw=darkgray!70!white,fill=epochfill,line width=1pt,anchor=center,minimum size=40pt] (foo\row) at (-1.2, 2.15-\ystretch*\row) {\timetext{\time}};
   }
 
   % xmin xmax
@@ -151,7 +174,13 @@
   	\node[draw=none, below=\heightpm of foo\row] (afterfoo\row) {};
   	\draw[{Turned Square[open,length=\tipwl,width=\tipwl]}-,darkgray!70!white,line width=1pt] (beforefoo\row) -- (foo\row.north);
   	\draw[-{Turned Square[open,length=\tipwl,width=\tipwl]},darkgray!70!white,line width=1pt] (foo\row) -- (afterfoo\row.north);
-  	
+  }
+
+  % draw epoch nodes again to cover line shadows
+  \foreach \row in {0,...,\trows} {
+	\pgfplotstablegetelem{\row}{[index]0}\of\ttable
+	\xdef\time{\pgfplotsretval}
+	\node[circle,draw=darkgray!70!white,fill=epochfill,line width=1pt,anchor=center,minimum size=40pt] (foo\row) at (-1.2, 2.15-\ystretch*\row) {\timetext{\time}};
   }
 
   \foreach \row in {0,...,\nrows} {
@@ -306,6 +335,51 @@
 %	\end{axis}
 %	
 %  }
+
+  \iftoggle{plotedges}{%
+  	%\node[draw=none] (corner) at (current bounding box.north east) {};
+  	%\node[draw=none,above=0.2cm of corner] (pushcorner) {};
+    \node[draw=darkgray!70!white,fill=white,minimum width=2.25cm,minimum height=2.4cm,line width=1pt,anchor=north east,nodeshadow] at (current bounding box.north east) {};
+
+    \node[draw=none,anchor=north east,inner sep=10pt,text width=1.15cm] at (current bounding box.north east) {\Huge $a_i$};
+
+    \node[circle,draw=none,anchor=north east,inner sep=4pt] (legref) at (current bounding box.north east) {};
+
+    \def\colnodems{0.85cm}
+    \def\colnodexoff{0.06}
+    \pgfmathsetmacro\colnodexl{0.95+\colnodexoff}
+    \pgfmathsetmacro\colnodexr{0.0+\colnodexoff}
+    \def\colnodeyoff{1}
+    \pgfmathsetmacro\colnodeyt{0.0+\colnodeyoff}
+    \pgfmathsetmacro\colnodeyb{0.95+\colnodeyoff}
+
+    \node[circle,draw=none,fill=col8,anchor=north east,inner sep=0,minimum size=\colnodems,below left = \colnodeyt cm and \colnodexl cm of legref] {\color{white}\LARGE $\Plus$};
+    \node[circle,draw=none,fill=col7,anchor=north east,inner sep=0,minimum size=\colnodems,below left = \colnodeyt cm and \colnodexr cm of legref] {\color{white}\LARGE $\Minus$};
+  }{%
+  	%\node[draw=none] (corner) at (current bounding box.north east) {};
+    %\node[draw=none,above=0.2cm of corner] (pushcorner) {};
+    \node[draw=darkgray!70!white,fill=white,minimum width=2.25cm,minimum height=3.1cm,line width=1pt,anchor=north east,nodeshadow] at (current bounding box.north east) {};
+  
+    \node[draw=none,anchor=north east,inner sep=8pt,text width=1.65cm] at (current bounding box.north east) {\LARGE Layers};
+  
+    \node[circle,draw=none,anchor=north east,inner sep=4pt] (legref) at (current bounding box.north east) {};
+  
+    \def\colnodeis{3pt}
+    \def\colnodexoff{0.06}
+    \pgfmathsetmacro\colnodexl{0.95+\colnodexoff}
+    \pgfmathsetmacro\colnodexr{0.0+\colnodexoff}
+    \def\colnodeyoff{0.9}
+    \pgfmathsetmacro\colnodeyt{0.0+\colnodeyoff}
+    \pgfmathsetmacro\colnodeyb{0.95+\colnodeyoff}
+  
+    \node[circle,draw=none,fill=col0,anchor=north east,inner sep=\colnodeis,below left = \colnodeyt cm and \colnodexl cm of legref] {\color{white}\LARGE \textbf{1}};
+    \node[circle,draw=none,fill=col1,anchor=north east,inner sep=\colnodeis,below left = \colnodeyt cm and \colnodexr cm of legref] {\color{white}\LARGE \textbf{2}};
+    \node[circle,draw=none,fill=col2,anchor=north east,inner sep=\colnodeis,below left = \colnodeyb cm and \colnodexl cm of legref] {\color{white}\LARGE \textbf{3}};
+    \node[circle,draw=none,fill=col3,anchor=north east,inner sep=\colnodeis,below left = \colnodeyb cm and \colnodexr cm of legref] {\color{white}\LARGE \textbf{4}};
+  }
+
+  \node[draw=darkgray!70!white,fill=epochfill,line width=1pt,anchor=north,inner sep=8pt,nodeshadow] (bar) at (-0.7, \ystretch-0.7) {\LARGE Epochs};
+
 
 \end{tikzpicture}
 \end{document}
